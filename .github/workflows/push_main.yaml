@@ -1,0 +1,35 @@
+name: Create Github Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  release:
+    name: 'Release to GitHub'
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code to release.
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      # Setup Node needed to create release.
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      # Add plugin to make the changelog for the release.
+      - name: Add plugin for conventional commits
+        run: npm install conventional-changelog-conventionalcommits
+        working-directory: ./.github/workflows
+      # Create the release.
+      - name: 'Release'
+        working-directory: ./.github/workflows
+        env:
+          GITHUB_TOKEN: ${{ secrets.GI_RELEASE_TOKEN  }}
+          GIT_AUTHOR_NAME: release-bot
+          GIT_AUTHOR_EMAIL: release@test.com
+          GIT_COMMITTER_NAME: asyncapi-bot
+          GIT_COMMITTER_EMAIL: info@asyncapi.io
+        run: npx semantic-release
